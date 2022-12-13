@@ -4,15 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"testing"
 	"time"
 )
 
 var Cli *Client
+
+type params struct {
+	Name string `json:"name" form:"name"`
+}
 
 func TestMain(m *testing.M) {
 	Cli = Default()
@@ -24,11 +30,56 @@ func TestMain(m *testing.M) {
 				"message": "do success",
 			})
 		})
+		r.GET("/test_get_params", func(c *gin.Context) {
+			p := &params{}
+			err := c.ShouldBind(p)
+			if err != nil {
+				c.JSON(400, gin.H{"err": err.Error()})
+				return
+			}
+			fmt.Printf("params:%v\n", p)
+			c.JSON(200, gin.H{"message": fmt.Sprintf("hello %v", p.Name)})
+		})
 		panic(r.Run(":29940"))
 	}()
 	time.Sleep(2 * time.Second)
 
 	os.Exit(m.Run())
+}
+
+func addParamsHandler(c *Context) {
+	fmt.Printf("url:%v\n", c.url)
+	urlParse, err := url.ParseRequestURI(c.url)
+	if err != nil {
+		c.err = errors.Wrap(err, "parse request url")
+		return
+	}
+	q := urlParse.Query()
+	p := Params{"name": "superwhys"}
+	for key, value := range p {
+		if !q.Has(key) {
+			q.Add(key, value)
+		}
+	}
+	urlParse.RawQuery = q.Encode()
+	c.url = urlParse.String()
+}
+
+func TestNewClientGet(t *testing.T) {
+	t.Run("testNewClientGet", func(t *testing.T) {
+		newCli := New(&Config{
+			requestTimeOut: 5 * time.Second,
+		})
+		newCli.Use(addParamsHandler, DefaultHTTPHandler())
+		resp, err := newCli.Get(
+			context.Background(),
+			fmt.Sprintf("%v/%v", srvApi, "test_get_params"),
+			nil,
+			DefaultJsonHeader(),
+		).Body()
+		assert.Nil(t, err)
+		assert.Equal(t, `{"message":"hello superwhys"}`, resp)
+	})
 }
 
 func TestClientGet(t *testing.T) {

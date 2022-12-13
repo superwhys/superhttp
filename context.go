@@ -55,7 +55,9 @@ func (c *Context) Abort() {
 }
 
 func (c *Context) URL(url string) *Context {
-	c.url = url
+	if url != "" {
+		c.url = url
+	}
 	return c
 }
 
@@ -65,17 +67,23 @@ func (c *Context) Method(method string) *Context {
 }
 
 func (c *Context) QueryParams(params Params) *Context {
-	c.params = params
+	if params != nil {
+		c.params = params
+	}
 	return c
 }
 
 func (c *Context) Headers(header *Header) *Context {
-	c.header = header
+	if header != nil {
+		c.header = header
+	}
 	return c
 }
 
 func (c *Context) Body(body []byte) *Context {
-	c.body = body
+	if body != nil {
+		c.body = body
+	}
 	return c
 }
 

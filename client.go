@@ -14,6 +14,7 @@ type Client struct {
 	HandlerGroup
 	conf       *Config
 	httpClient *http.Client
+	isDefault  bool
 }
 
 func newClient(conf *Config) (*Client, error) {
@@ -67,6 +68,7 @@ func New(conf *Config) *Client {
 	if err != nil {
 		panic(errors.Wrap(err, "new httpclient failed"))
 	}
+	client.isDefault = false
 	return client
 }
 
@@ -81,9 +83,9 @@ func Default() *Client {
 		RequestDefaultHeaderHandler(),
 		RequestParamsHandler(),
 		RequestBodyReaderHandler(),
-		GenerateRequestHandler(),
 		DefaultHTTPHandler(),
 	)
+	cli.isDefault = true
 	return cli
 }
 

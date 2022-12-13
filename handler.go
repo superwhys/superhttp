@@ -45,6 +45,7 @@ func RequestParamsHandler() HandleFunc {
 			urlParse, err := url.ParseRequestURI(c.url)
 			if err != nil {
 				c.err = errors.Wrap(err, "parse request url")
+				return
 			}
 			q := urlParse.Query()
 			for key, value := range c.params {
@@ -66,21 +67,17 @@ func RequestDefaultHeaderHandler() HandleFunc {
 	}
 }
 
-func GenerateRequestHandler() HandleFunc {
+func DefaultHTTPHandler() HandleFunc {
 	return func(c *Context) {
 		req, err := http.NewRequest(c.method, c.url, c.bodyReader)
 		if err != nil {
 			c.err = errors.Wrap(err, "generate request")
 			return
 		}
-		c.Request = req
 		req.Header = c.header.Header
-	}
-}
+		c.Request = req
 
-func DefaultHTTPHandler() HandleFunc {
-	return func(c *Context) {
-		resp, err := c.client.Do(c.Request)
+		resp, err := c.client.Do(req)
 		c.Response = resp
 		if err != nil {
 			c.err = err
