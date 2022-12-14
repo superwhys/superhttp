@@ -98,25 +98,24 @@ func (cli *Client) Start() *Context {
 	return ctx
 }
 
-func (cli *Client) Get(ctx context.Context, url string, queryParams Params, header *Header, callBack ...HandleFunc) *Response {
+func (cli *Client) DoRequest(ctx context.Context, url, method string, queryParams Params, header *Header, body []byte, callBack ...HandleFunc) *Response {
 	cli.Use(callBack...)
 	return cli.
 		Start().
-		Method(http.MethodGet).
+		Method(method).
 		URL(url).
 		QueryParams(queryParams).
 		Headers(header).
+		Body(body).
 		Fetch(ctx)
+}
+
+func (cli *Client) Get(ctx context.Context, url string, queryParams Params, header *Header, callBack ...HandleFunc) *Response {
+	cli.Use(callBack...)
+	return cli.DoRequest(ctx, url, http.MethodGet, queryParams, header, nil, callBack...)
 }
 
 func (cli *Client) Post(ctx context.Context, url string, queryParams Params, header *Header, body []byte, callBack ...HandleFunc) *Response {
 	cli.Use(callBack...)
-	return cli.
-		Start().
-		Method(http.MethodPost).
-		URL(url).
-		QueryParams(queryParams).
-		Body(body).
-		Headers(header).
-		Fetch(ctx)
+	return cli.DoRequest(ctx, url, http.MethodPost, queryParams, header, body, callBack...)
 }
