@@ -22,3 +22,9 @@ func DefaultFormUrlEncodedHeader() *Header {
 	header.Add("Content-Type", "application/x-www-form-urlencoded")
 	return &Header{Header: header}
 }
+
+func DefaultFormHeader() *Header {
+	header := http.Header{}
+	header.Add("Content-Type", "multipart/form-data")
+	return &Header{Header: header}
+}
