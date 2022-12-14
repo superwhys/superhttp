@@ -7,10 +7,6 @@ import (
 	"testing"
 )
 
-var (
-	srvApi = "http://127.0.0.1:29940"
-)
-
 func TestClientContext(t *testing.T) {
 	t.Run("testContextFetch", func(t *testing.T) {
 		resp, err := Cli.Start().
@@ -18,7 +14,7 @@ func TestClientContext(t *testing.T) {
 			URL(fmt.Sprintf("%v/%v", srvApi, "test_get")).
 			Headers(DefaultJsonHeader()).
 			Fetch(context.Background()).
-			Body()
+			BodyString()
 		assert.Nil(t, err)
 		assert.Equal(t, `{"message":"do success"}`, resp)
 	})

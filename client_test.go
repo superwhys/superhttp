@@ -14,7 +14,10 @@ import (
 	"time"
 )
 
-var Cli *Client
+var (
+	Cli    *Client
+	srvApi = "http://127.0.0.1:29940"
+)
 
 type params struct {
 	Name string `json:"name" form:"name"`
@@ -76,7 +79,7 @@ func TestNewClientGet(t *testing.T) {
 			fmt.Sprintf("%v/%v", srvApi, "test_get_params"),
 			nil,
 			DefaultJsonHeader(),
-		).Body()
+		).BodyString()
 		assert.Nil(t, err)
 		assert.Equal(t, `{"message":"hello superwhys"}`, resp)
 	})
@@ -89,7 +92,7 @@ func TestClientGet(t *testing.T) {
 			fmt.Sprintf("%v/%v", srvApi, "test_get"),
 			nil,
 			DefaultJsonHeader(),
-		).Body()
+		).BodyString()
 		assert.Nil(t, err)
 		assert.Equal(t, `{"message":"do success"}`, resp)
 	})
